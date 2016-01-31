@@ -1,6 +1,7 @@
 package di
 
 import "testing"
+
 import "github.com/gin-gonic/gin"
 
 type B struct {
@@ -74,4 +75,14 @@ func TestGinHandleWithDI(t *testing.T) {
 	if !ready {
 		t.Error("Response func was not called")
 	}
+}
+func TestInvalidResponse(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("Need panic")
+		}
+	}()
+	GinHandleWithDI(NewDIC(), Controller.Get, 123)
+
 }

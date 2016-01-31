@@ -77,6 +77,9 @@ func GinHandleWithDI(dic DIC, reqFn interface{}, resFn interface{}) func(ctx *gi
 	if ctrl.Kind() != reflect.Struct {
 		panic("Request function should be method of struct")
 	}
+	if resFn != nil && reflect.TypeOf(resFn).Kind() != reflect.Func {
+		panic("Response is not function")
+	}
 	return func(ctx *gin.Context) {
 		var ctrlNew = reflect.New(ctrl)
 
@@ -89,7 +92,10 @@ func GinHandleWithDI(dic DIC, reqFn interface{}, resFn interface{}) func(ctx *gi
 			if ctrl.Method(i).Func.Pointer() == reqFnPtr {
 				res := ctrlNew.Elem().Method(i).Call(args)
 				res = append([]reflect.Value{reflect.ValueOf(ctx)}, res...)
-				reflect.ValueOf(resFn).Call(res)
+				if resFn != nil {
+					reflect.ValueOf(resFn).Call(res)
+				}
+
 				break
 			}
 		}
